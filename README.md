@@ -103,9 +103,12 @@ Team_project/
 - Node.js 14+
 - npm 或 yarn
 - Git
+- SQLite3
 - Docker (可选)
 
 ### 本地开发
+
+#### 方式一：使用项目脚本（推荐）
 
 1. **克隆项目**
 ```bash
@@ -113,39 +116,131 @@ git clone <repository-url>
 cd Team_project
 ```
 
-2. **启动后端服务**
+2. **安装依赖**
 ```bash
-cd backend
 npm install
+```
+
+3. **初始化数据库**
+```bash
+npm run db:init
+npm run db:seed
+```
+
+4. **启动开发服务器**
+```bash
 npm run dev
 ```
 
-3. **启动前端服务**
+5. **访问应用**
+- 前端：http://localhost:3000
+- 后端API：http://localhost:3001
+
+#### 方式二：分别启动前后端
+
+1. **启动后端服务**
+```bash
+cd backend
+npm install
+# 初始化数据库
+node scripts/init-db.js
+node scripts/seed-data.js
+# 启动服务
+npm start
+```
+
+2. **启动前端服务**
 ```bash
 cd frontend
 npm install
 npm start
 ```
 
-4. **访问应用**
-- 前端：http://localhost:3000
-- 后端API：http://localhost:3001
+### 生产环境部署
 
-### Docker部署
+#### 使用Docker
 
 ```bash
-cd deployment
+# 构建并启动所有服务
 docker-compose up -d
+
+# 查看服务状态
+docker-compose ps
+
+# 查看日志
+docker-compose logs -f
 ```
 
-## API接口
+#### 手动部署
+
+1. **构建前端**
+```bash
+cd frontend
+npm run build
+```
+
+2. **部署后端**
+```bash
+cd backend
+npm install --production
+npm run build
+npm start
+```
+
+## 功能特性
+
+### 核心功能
+- ✅ 任务创建和编辑
+- ✅ 任务状态管理（待办、进行中、已完成）
+- ✅ 任务优先级设置（低、中、高）
+- ✅ 任务分配给团队成员
+- ✅ 实时数据同步
+- ✅ 响应式界面设计
+
+### 技术特性
+- 🚀 前后端分离架构
+- 📱 移动端适配
+- 🔄 RESTful API设计
+- 💾 SQLite轻量级数据库
+- 🐳 Docker容器化支持
+- 🔧 完整的开发工具链
+
+## API接口文档
+
+### 健康检查
+- `GET /api/health` - 服务器健康状态检查
 
 ### 任务管理
-- `GET /api/tasks` - 获取所有任务
+- `GET /api/tasks` - 获取所有任务列表
 - `POST /api/tasks` - 创建新任务
-- `PUT /api/tasks/:id` - 更新任务
-- `DELETE /api/tasks/:id` - 删除任务
-- `GET /api/health` - 健康检查
+- `PUT /api/tasks/:id` - 更新指定任务
+- `DELETE /api/tasks/:id` - 删除指定任务
+
+#### 请求示例
+
+**创建任务**
+```bash
+curl -X POST http://localhost:3001/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "新任务",
+    "description": "任务描述",
+    "status": "pending",
+    "priority": "medium",
+    "assignee": "张三"
+  }'
+```
+
+**更新任务**
+```bash
+curl -X PUT http://localhost:3001/api/tasks/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "更新的任务",
+    "status": "in_progress",
+    "priority": "high"
+  }'
+```
 
 ## Git协作流程
 
@@ -189,6 +284,98 @@ type(scope): description
 - [ ] **第三周**：功能完善和测试
 - [ ] **第四周**：部署上线和文档完善
 
+## 故障排除
+
+### 常见问题
+
+#### 1. 后端启动失败
+**问题**：`MODULE_NOT_FOUND` 错误
+**解决方案**：
+```bash
+cd backend
+npm install
+```
+
+#### 2. 数据库连接失败
+**问题**：SQLite数据库文件不存在
+**解决方案**：
+```bash
+cd backend
+node scripts/init-db.js
+```
+
+#### 3. 前端无法连接后端
+**问题**：CORS错误或网络请求失败
+**解决方案**：
+- 确保后端服务在3001端口运行
+- 检查防火墙设置
+- 验证API地址配置
+
+#### 4. 端口占用问题
+**问题**：端口3000或3001被占用
+**解决方案**：
+```bash
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -ti:3000 | xargs kill -9
+```
+
+#### 5. Docker部署问题
+**问题**：容器启动失败
+**解决方案**：
+```bash
+# 查看容器日志
+docker-compose logs
+
+# 重新构建镜像
+docker-compose build --no-cache
+
+# 清理并重启
+docker-compose down
+docker-compose up -d
+```
+
+### 开发调试
+
+#### 查看日志
+```bash
+# 后端日志
+npm run logs
+
+# 前端开发服务器日志
+npm start
+```
+
+#### 数据库操作
+```bash
+# 重置数据库
+npm run db:reset
+
+# 查看数据库内容
+sqlite3 database/tasks.db ".tables"
+sqlite3 database/tasks.db "SELECT * FROM tasks;"
+```
+
+## 性能优化建议
+
+1. **前端优化**
+   - 使用React.memo减少不必要的重渲染
+   - 实现虚拟滚动处理大量任务
+   - 添加加载状态和错误处理
+
+2. **后端优化**
+   - 添加数据库索引
+   - 实现API响应缓存
+   - 使用连接池管理数据库连接
+
+3. **部署优化**
+   - 启用gzip压缩
+   - 配置CDN加速静态资源
+   - 使用PM2管理Node.js进程
+
 ## 贡献指南
 
 1. Fork 本仓库
@@ -196,6 +383,13 @@ type(scope): description
 3. 提交你的修改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 打开一个 Pull Request
+
+## 联系方式
+
+如果您在使用过程中遇到问题，可以通过以下方式联系我们：
+- 提交Issue：[GitHub Issues](https://github.com/your-repo/issues)
+- 邮箱：team@example.com
+- 文档：查看项目Wiki获取更多详细信息
 
 ## 许可证
 

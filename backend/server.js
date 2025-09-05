@@ -21,10 +21,18 @@ db.serialize(() => {
     title TEXT NOT NULL,
     description TEXT,
     status TEXT DEFAULT 'pending',
+    priority TEXT DEFAULT 'medium',
     assignee TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  
+  // 为现有表添加priority字段（如果不存在）
+  db.run(`ALTER TABLE tasks ADD COLUMN priority TEXT DEFAULT 'medium'`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('添加priority字段失败:', err.message);
+    }
+  });
 });
 
 // API 路由
@@ -42,20 +50,20 @@ app.get('/api/tasks', (req, res) => {
 
 // 创建新任务
 app.post('/api/tasks', (req, res) => {
-  const { title, description, assignee } = req.body;
+  const { title, description, assignee, priority } = req.body;
   
   if (!title) {
     res.status(400).json({ error: '任务标题不能为空' });
     return;
   }
 
-  const stmt = db.prepare('INSERT INTO tasks (title, description, assignee) VALUES (?, ?, ?)');
-  stmt.run(title, description || '', assignee || '', function(err) {
+  const stmt = db.prepare('INSERT INTO tasks (title, description, assignee, priority) VALUES (?, ?, ?, ?)');
+  stmt.run(title, description || '', assignee || '', priority || 'medium', function(err) {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json({ id: this.lastID, title, description, assignee, status: 'pending' });
+    res.json({ id: this.lastID, title, description, assignee, priority: priority || 'medium', status: 'pending' });
   });
   stmt.finalize();
 });
@@ -63,19 +71,20 @@ app.post('/api/tasks', (req, res) => {
 // 更新任务
 app.put('/api/tasks/:id', (req, res) => {
   const { id } = req.params;
-  const { title, description, status, assignee } = req.body;
+  const { title, description, status, assignee, priority } = req.body;
   
   const stmt = db.prepare(`
     UPDATE tasks 
     SET title = COALESCE(?, title),
         description = COALESCE(?, description),
         status = COALESCE(?, status),
+        priority = COALESCE(?, priority),
         assignee = COALESCE(?, assignee),
         updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
   
-  stmt.run(title, description, status, assignee, id, function(err) {
+  stmt.run(title, description, status, priority, assignee, id, function(err) {
     if (err) {
       res.status(500).json({ error: err.message });
       return;

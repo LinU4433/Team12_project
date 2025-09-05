@@ -1,0 +1,65 @@
+{
+  "name": "team-task-management-system",
+  "version": "1.0.0",
+  "description": "团队任务管理系统 - 高效的团队协作平台",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test -- --watchAll=false",
+    "test:coverage": "npm run test:backend && npm run test:frontend -- --coverage",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "clean": "npm run clean:backend && npm run clean:frontend && rm -rf node_modules",
+    "clean:backend": "cd backend && npm run clean",
+    "clean:frontend": "cd frontend && npm run clean",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:fix": "npm run lint:fix:backend && npm run lint:fix:frontend",
+    "lint:fix:backend": "cd backend && npm run lint:fix",
+    "lint:fix:frontend": "cd frontend && npm run lint:fix",
+    "db:init": "cd backend && npm run db:init",
+    "db:seed": "cd backend && npm run db:seed",
+    "db:reset": "cd backend && npm run db:reset",
+    "health": "cd backend && npm run health",
+    "deploy": "npm run build && echo 'Project ready for deployment'",
+    "postinstall": "npm run install:all"
+  },
+  "keywords": [
+    "task-management",
+    "team-collaboration",
+    "react",
+    "nodejs",
+    "express",
+    "sqlite",
+    "full-stack"
+  ],
+  "author": "四人小组",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/team-task-management-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/team-task-management-system/issues"
+  },
+  "homepage": "https://github.com/your-username/team-task-management-system#readme"
+}
